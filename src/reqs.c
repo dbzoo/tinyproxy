@@ -428,11 +428,12 @@ BAD_REQUEST_ERROR:
                         goto fail;
                 }
         } else if (strcmp (request->method, "CONNECT") == 0) {
-	        char *realm = orderedmap_find(hashofheaders, "X-OPSW-REALM");
-		if(realm) {
-		  request->host = realm;
-		  request->port = 0; /* Overwritten by the upstream mapping */
-		} else if (extract_url (url, HTTP_PORT_SSL, request) < 0) {
+                char *realm = orderedmap_find(hashofheaders, "X-OPSW-REALM");
+                if(realm) {
+                        log_message(LOG_CONN, "Request (file descriptor %d): X-OPSW-REALM: %s", connptr->client_fd, realm);
+                        request->host = realm;
+                        request->port = 0; /* Overwritten by the upstream mapping */
+                } else if (extract_url (url, HTTP_PORT_SSL, request) < 0) {
                         indicate_http_error (connptr, 400, "Bad Request",
                                              "detail", "Could not parse URL",
                                              "url", url, NULL);
@@ -1727,7 +1728,6 @@ e401:
 	if (up->type == PT_OMBP) {
 	  request->host = safestrdup(up->host);
 	  request->port = up->port;
-	  free(up);
 	} else {
 	  connptr->upstream_proxy = up;
 	}
