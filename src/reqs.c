@@ -65,7 +65,7 @@
 #ifdef UPSTREAM_SUPPORT
 #  define UPSTREAM_CONFIGURED() (config->upstream_list != NULL)
 #  define UPSTREAM_HOST(host) upstream_get(host, config->upstream_list)
-#  define UPSTREAM_IS_HTTP(conn) (conn->upstream_proxy != NULL && conn->upstream_proxy->type == PT_HTTP)
+#  define UPSTREAM_IS_HTTP(conn) (conn->upstream_proxy != NULL && (conn->upstream_proxy->type == PT_HTTP || conn->upstream_proxy->type == PT_OMBP))
 #else
 #  define UPSTREAM_CONFIGURED() (0)
 #  define UPSTREAM_HOST(host) (NULL)
@@ -428,7 +428,11 @@ BAD_REQUEST_ERROR:
                         goto fail;
                 }
         } else if (strcmp (request->method, "CONNECT") == 0) {
-                if (extract_url (url, HTTP_PORT_SSL, request) < 0) {
+	        char *realm = orderedmap_find(hashofheaders, "X-OPSW-REALM");
+		if(realm) {
+                        request->host = safestrdup(realm);
+                        request->port = 0; /* Overwritten by the upstream mapping */
+                } else if (extract_url (url, HTTP_PORT_SSL, request) < 0) {
                         indicate_http_error (connptr, 400, "Bad Request",
                                              "detail", "Could not parse URL",
                                              "url", url, NULL);
@@ -1578,6 +1582,7 @@ void handle_connection (struct conn_s *connptr, union sockaddr_union* addr)
         size_t i;
         struct request_s *request = NULL;
         orderedmap hashofheaders = NULL;
+        struct upstream *up;
 
         char sock_ipaddr[IP_LENGTH];
         char peer_ipaddr[IP_LENGTH];
@@ -1717,7 +1722,16 @@ e401:
                 HC_FAIL();
         }
 
-        connptr->upstream_proxy = UPSTREAM_HOST (request->host);
+        /* We hijack the upstream directive to redirect ombp connections. */
+        up = UPSTREAM_HOST (request->host);
+        if (up->type == PT_OMBP) {
+                free(request->host);
+                request->host = safestrdup(up->host);
+                request->port = up->port;
+                free(up);
+        } else {
+                connptr->upstream_proxy = up;
+        }
         if (connptr->upstream_proxy != NULL) {
                 if (connect_to_upstream (connptr, request) < 0) {
                         HC_FAIL();

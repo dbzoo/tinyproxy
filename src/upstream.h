@@ -46,7 +46,8 @@ typedef enum proxy_type {
 	PT_NONE = 0,
 	PT_HTTP,
 	PT_SOCKS4,
-	PT_SOCKS5
+	PT_SOCKS5,
+	PT_OMBP
 } proxy_type;
 
 struct upstream {

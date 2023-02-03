@@ -39,6 +39,7 @@ proxy_type_name(proxy_type type)
         case PT_HTTP: return "http";
         case PT_SOCKS4: return "socks4";
         case PT_SOCKS5: return "socks5";
+        case PT_OMBP: return "ombp";
         default: return "unknown";
     }
 }

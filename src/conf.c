@@ -247,7 +247,7 @@ struct {
 #ifdef UPSTREAM_SUPPORT
         STDCONF (upstream,
                  "(" "(none)" WS STR ")|" \
-                 "(" "(http|socks4|socks5)" WS \
+                 "(" "(http|socks4|socks5|ombp)" WS \
                      "(" USERNAME /*username*/ ":" PASSWORD /*password*/ "@" ")?"
                      "(" IP "|" ALNUM ")"
                      ":" INT "(" WS STR ")?" ")", handle_upstream),
@@ -1069,6 +1069,7 @@ static enum proxy_type pt_from_string(const char *s)
 		[PT_HTTP]   = "http",
 		[PT_SOCKS4] = "socks4",
 		[PT_SOCKS5] = "socks5",
+		[PT_OMBP] = "ombp"
 	};
 	unsigned i;
 	for (i = 0; i < sizeof(pt_map)/sizeof(pt_map[0]); i++)
