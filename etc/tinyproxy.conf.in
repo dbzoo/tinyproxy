@@ -46,7 +46,7 @@ Port 8888
 # Timeout: The maximum number of seconds of inactivity a connection is
 # allowed to have before it is closed by tinyproxy.
 #
-Timeout 600
+Timeout 1800
 
 #
 # ErrorFile: Defines the HTML file to send when a given HTTP error
@@ -150,6 +150,11 @@ LogLevel Info
 #  upstream http testproxy:8008 ".test.domain.invalid"
 #  upstream http testproxy:8008 ".our_testbed.example.com"
 #  upstream http testproxy:8008 "192.168.128.0/255.255.254.0"
+#
+#  # Routing the extend opswgw realm connect and ombp protocol
+#  #   CONNECT Vault:OMB
+#  #   X-OPSWGW-REALM: C1-mm
+#  upstream ombp 10.80.8.11:7501 "C1-mm"
 #
 #  # upstream proxy using basic authentication
 #  upstream http user:pass@testproxy:8008 ".test.domain.invalid"
